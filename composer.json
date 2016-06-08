@@ -1,5 +1,6 @@
 {
     "require": {
-        "vlucas/phpdotenv": "^2.2"
+        "vlucas/phpdotenv": "^2.2",
+        "wimkumpen/wit-php-sdk": "^1.0"
     }
 }

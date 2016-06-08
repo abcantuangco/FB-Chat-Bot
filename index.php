@@ -24,16 +24,17 @@ class MessengerBot {
     public function listen()
     {
         $this->chat_message = json_decode(file_get_contents('php://input'), true);
-        if(isset($this->chat_message['entry'][0]['messaging'][0]['message']) && !empty($this->chat_message['entry'][0]['messaging'][0]['message'])){
+        $this->log($this->chat_message);
+        if( (isset($this->chat_message['entry'][0]['messaging'][0]['message']) && !empty($this->chat_message['entry'][0]['messaging'][0]['message'])) || (isset($this->chat_message['entry'][0]['messaging'][0]['postback']) && !empty($this->chat_message['entry'][0]['messaging'][0]['postback'])) ){
             $this->prepare_message();
             $this->respond();
         }
     }
 
     public function prepare_message() {
-        if(isset($this->chat_message['entry'][0]['messaging'][0]['message']) && !empty($this->chat_message['entry'][0]['messaging'][0]['message'])){
+        if( (isset($this->chat_message['entry'][0]['messaging'][0]['message']) && !empty($this->chat_message['entry'][0]['messaging'][0]['message'])) || (isset($this->chat_message['entry'][0]['messaging'][0]['postback']) && !empty($this->chat_message['entry'][0]['messaging'][0]['postback'])) ){
             $this->sender = $this->chat_message['entry'][0]['messaging'][0]['sender']['id'];
-            $this->respond_message = $this->createMessage( $this->chat_message['entry'][0]['messaging'][0]['message']['text'] );
+            $this->respond_message = $this->createMessage( isset($this->chat_message['entry'][0]['messaging'][0]['message']['text']) ? $this->chat_message['entry'][0]['messaging'][0]['message']['text'] : $this->chat_message['entry'][0]['messaging'][0]['postback']['payload'] );
         }
     }
 
@@ -42,12 +43,28 @@ class MessengerBot {
         $hi = strpos( strtolower(trim($message)), 'hi' );
         $hello = strpos( strtolower(trim($message)), 'hello' );
 
+        $image = strpos( strtolower(trim($message)), 'image' );
+        $buttons = strpos( strtolower(trim($message)), 'button' );
+
         if ($hi !== false) {
             return $this->generateMessageBody(['text' => 'Hello there!']);
         }
 
         if ($hello !== false) {
             return $this->generateMessageBody(['text' => 'Hi there!']);
+        }
+
+        if ($image !== false) {
+            return $this->generateMessageBody(['image_url' => 'http://lorempixel.com/400/200/sports/'], 'image');
+        }
+
+        if ($buttons !== false) {
+            return $this->generateMessageBody(['text' => 'This is a sample button template',
+                'web_url' => 'http://www.gmanetwork.com/news',
+                'web_url_text' => 'GMA News Online',
+                'postback_title' => 'Click for an Image',
+                'postback' => 'image'
+                ], 'buttons');
         }
 
     }
@@ -58,37 +75,33 @@ class MessengerBot {
 
         switch ($type) {
             case 'image':
-                if ($data->image_url) {
-                    $template = '"attachment":{
-                                    "type":"image",
-                                    "payload":{
-                                        "url":"' . $data->image_url . '"
-                                    }
-                                }';
-                }
+                $template = '"attachment":{
+                                "type":"image",
+                                "payload":{
+                                    "url":"' . $data->image_url . '"
+                                }
+                            }';
                 break;
             case 'buttons':
-                if ($data->buttons) {
-                    $template = '"attachment":{
-                                      "type":"template",
-                                      "payload":{
-                                        "template_type":"button",
-                                        "text":"' . $data->text . '",
-                                        "buttons":[
-                                            {
-                                                "type":"web_url",
-                                                "url":"' . $data->web_url . '",
-                                                "title":"' . $data->web_url_text . '"
-                                            },
-                                            {
-                                                "type":"postback",
-                                                "title":"' . $data->postback_title . '",
-                                                "payload":"' . $data->postback_url . '"
-                                            }
-                                        ]
-                                      }
-                                    }';
-                }
+                $template = '"attachment":{
+                                  "type":"template",
+                                  "payload":{
+                                    "template_type":"button",
+                                    "text":"' . $data->text . '",
+                                    "buttons":[
+                                        {
+                                            "type":"web_url",
+                                            "url":"' . $data->web_url . '",
+                                            "title":"' . $data->web_url_text . '"
+                                        },
+                                        {
+                                            "type":"postback",
+                                            "title":"' . $data->postback_title . '",
+                                            "payload":"' . $data->postback . '"
+                                        }
+                                    ]
+                                  }
+                                }';
                 break;
             default:
                 if ($data->text) {
