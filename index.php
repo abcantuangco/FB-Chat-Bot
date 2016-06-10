@@ -80,7 +80,7 @@ class MessengerBot {
         }
 
         if ($image !== false) {
-            return $this->generateMessageBody(['image_url' => 'http://lorempixel.com/400/200/sports/'], 'image');
+            return $this->generateMessageBody(['image_url' => 'http://lorempixel.com/400/400/abstract /'], 'image');
         }
 
         if ($buttons !== false) {
@@ -140,7 +140,7 @@ class MessengerBot {
                                     "elements":[
                                         {
                                             "title":"Article 01",
-                                            "image_url":"http://lorempixel.com/400/400/sports/",
+                                            "image_url":"http://lorempixel.com/400/400/abstract /",
                                             "subtitle":"Sample article 01 here for testing.",
                                             "buttons":[
                                                 {
@@ -157,7 +157,7 @@ class MessengerBot {
                                         },
                                         {
                                             "title":"Article 02",
-                                            "image_url":"http://lorempixel.com/400/400/sports/",
+                                            "image_url":"http://lorempixel.com/400/400/abstract /",
                                             "subtitle":"Sample article 02 here for testing.",
                                             "buttons":[
                                                 {
